@@ -9,7 +9,7 @@ function handleFileUpload(event) {
             const workbook = XLSX.read(data, { type: 'array' });
             const sheetName = workbook.SheetNames[0];
             const sheet = workbook.Sheets[sheetName];
-            const jsonData = XLSX.utils.sheet_to_json(sheet);
+            const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
             displayTable(jsonData);
         };
         reader.readAsArrayBuffer(file);
@@ -25,10 +25,9 @@ function displayTable(data) {
         return;
     }
 
-    const headers = Object.keys(data[0]);
     const thead = document.createElement('thead');
     const trHead = document.createElement('tr');
-    headers.forEach(header => {
+    data[0].forEach(header => {
         const th = document.createElement('th');
         th.textContent = header;
         trHead.appendChild(th);
@@ -37,29 +36,31 @@ function displayTable(data) {
     table.appendChild(thead);
 
     const tbody = document.createElement('tbody');
-    data.forEach(row => {
+    data.slice(1).forEach(row => {
         const tr = document.createElement('tr');
-        headers.forEach(header => {
+        row.forEach(cell => {
             const td = document.createElement('td');
-            td.textContent = row[header];
+            td.textContent = cell;
             tr.appendChild(td);
         });
         tbody.appendChild(tr);
     });
     table.appendChild(tbody);
 
-    createFilters(headers, data);
+    createFilters(data);
 }
 
-function createFilters(headers, data) {
+function createFilters(data) {
     const filterOptions = document.getElementById('filterOptions');
     filterOptions.innerHTML = '';
 
-    headers.forEach(header => {
-        const select = document.createElement('select');
-        select.innerHTML = '<option value="">Select ' + header + '</option>';
+    const headers = data[0];
 
-        const values = [...new Set(data.map(row => row[header]))];
+    headers.forEach((header, index) => {
+        const select = document.createElement('select');
+        select.innerHTML = `<option value="">Select ${header}</option>`;
+
+        const values = [...new Set(data.slice(1).map(row => row[index]))];
         values.forEach(value => {
             const option = document.createElement('option');
             option.value = value;
@@ -67,23 +68,18 @@ function createFilters(headers, data) {
             select.appendChild(option);
         });
 
-        select.addEventListener('change', () => filterTable(header, select.value));
+        select.addEventListener('change', () => filterTable(index, select.value));
         filterOptions.appendChild(select);
     });
 }
 
-function filterTable(column, value) {
+function filterTable(columnIndex, value) {
     const table = document.getElementById('dataTable');
     const rows = table.querySelectorAll('tbody tr');
     rows.forEach(row => {
-        const cell = row.querySelector(`td:nth-child(${getColumnIndex(column) + 1})`);
+        const cell = row.querySelector(`td:nth-child(${columnIndex + 1})`);
         if (cell) {
-            row.style.display = cell.textContent === value || !value ? '' : 'none';
+            row.style.display = cell.textContent === value || value === "" ? '' : 'none';
         }
     });
-}
-
-function getColumnIndex(columnName) {
-    const headers = Array.from(document.querySelectorAll('#dataTable thead th'));
-    return headers.findIndex(th => th.textContent === columnName);
 }
