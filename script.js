@@ -40,7 +40,7 @@ function displayTable(data) {
         const tr = document.createElement('tr');
         row.forEach(cell => {
             const td = document.createElement('td');
-            td.textContent = cell;
+            td.textContent = formatCellValue(cell);
             tr.appendChild(td);
         });
         tbody.appendChild(tr);
@@ -48,6 +48,15 @@ function displayTable(data) {
     table.appendChild(tbody);
 
     createFilters(data);
+}
+
+function formatCellValue(cell) {
+    if (typeof cell === 'string' || cell instanceof String) {
+        if (moment(cell, moment.ISO_8601, true).isValid()) {
+            return moment(cell).format('YYYY-MM-DD HH:mm:ss');
+        }
+    }
+    return cell;
 }
 
 function createFilters(data) {
