@@ -3,16 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome Page</title>
+    <title>Spreadsheet Viewer</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>Welcome to My Website!</h1>
-        <p>This is a simple welcome page.</p>
-        <button onclick="displayMessage()">Click Me</button>
-        <p id="message"></p>
+        <h1>Upload and View Your Spreadsheet</h1>
+        <input type="file" id="fileInput" accept=".csv, .xlsx, .xls" />
+        <div id="spreadsheetContainer">
+            <table id="dataTable"></table>
+        </div>
+        <div id="filterOptions"></div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
